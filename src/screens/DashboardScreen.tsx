@@ -50,58 +50,58 @@ export const DashboardScreen: React.FC = () => {
         </p>
 
         {/* Summary Chips */}
-        <div className="grid grid-cols-4 gap-2 pt-1">
+        <div className="grid grid-cols-2 sm:grid-cols-4 gap-2.5 pt-1">
           <button
             onClick={() => setSelectedFilter(selectedFilter === 'RED' ? 'ALL' : 'RED')}
-            className={`p-2 rounded-xl border text-center transition-all ${
+            className={`p-3 rounded-xl border text-center transition-all ${
               selectedFilter === 'RED'
                 ? 'bg-rose-100 border-rose-400 ring-2 ring-rose-300'
                 : 'bg-rose-50/70 border-rose-200 hover:bg-rose-100/70'
             }`}
           >
-            <div className="flex items-center justify-center gap-1 text-rose-700">
-              <AlertTriangle className="w-3.5 h-3.5" />
-              <span className="text-base font-extrabold">{redCount}</span>
+            <div className="flex items-center justify-center gap-1.5 text-rose-700">
+              <AlertTriangle className="w-4 h-4" />
+              <span className="text-xl font-extrabold">{redCount}</span>
             </div>
-            <span className="text-[10px] font-bold text-rose-800 uppercase">Red</span>
+            <span className="text-[11px] font-bold text-rose-800 uppercase tracking-wide">Red Flag</span>
           </button>
 
           <button
             onClick={() => setSelectedFilter(selectedFilter === 'ORANGE' ? 'ALL' : 'ORANGE')}
-            className={`p-2 rounded-xl border text-center transition-all ${
+            className={`p-3 rounded-xl border text-center transition-all ${
               selectedFilter === 'ORANGE'
                 ? 'bg-amber-100 border-amber-400 ring-2 ring-amber-300'
                 : 'bg-amber-50/70 border-amber-200 hover:bg-amber-100/70'
             }`}
           >
-            <div className="flex items-center justify-center gap-1 text-amber-700">
-              <AlertCircle className="w-3.5 h-3.5" />
-              <span className="text-base font-extrabold">{orangeCount}</span>
+            <div className="flex items-center justify-center gap-1.5 text-amber-700">
+              <AlertCircle className="w-4 h-4" />
+              <span className="text-xl font-extrabold">{orangeCount}</span>
             </div>
-            <span className="text-[10px] font-bold text-amber-800 uppercase">Orange</span>
+            <span className="text-[11px] font-bold text-amber-800 uppercase tracking-wide">Orange Flag</span>
           </button>
 
           <button
             onClick={() => setSelectedFilter(selectedFilter === 'GREEN' ? 'ALL' : 'GREEN')}
-            className={`p-2 rounded-xl border text-center transition-all ${
+            className={`p-3 rounded-xl border text-center transition-all ${
               selectedFilter === 'GREEN'
                 ? 'bg-emerald-100 border-emerald-400 ring-2 ring-emerald-300'
                 : 'bg-emerald-50/70 border-emerald-200 hover:bg-emerald-100/70'
             }`}
           >
-            <div className="flex items-center justify-center gap-1 text-emerald-700">
-              <CheckCircle2 className="w-3.5 h-3.5" />
-              <span className="text-base font-extrabold">{greenCount}</span>
+            <div className="flex items-center justify-center gap-1.5 text-emerald-700">
+              <CheckCircle2 className="w-4 h-4" />
+              <span className="text-xl font-extrabold">{greenCount}</span>
             </div>
-            <span className="text-[10px] font-bold text-emerald-800 uppercase">Green</span>
+            <span className="text-[11px] font-bold text-emerald-800 uppercase tracking-wide">Green (On Track)</span>
           </button>
 
-          <div className="p-2 rounded-xl border bg-slate-50 border-slate-200 text-center">
-            <div className="flex items-center justify-center gap-1 text-slate-700">
-              <Clock className="w-3.5 h-3.5 text-orange-600" />
-              <span className="text-base font-extrabold">{pendingSyncCount}</span>
+          <div className="p-3 rounded-xl border bg-slate-50 border-slate-200 text-center">
+            <div className="flex items-center justify-center gap-1.5 text-slate-700">
+              <Clock className="w-4 h-4 text-orange-600" />
+              <span className="text-xl font-extrabold">{pendingSyncCount}</span>
             </div>
-            <span className="text-[10px] font-semibold text-slate-500 uppercase">Queued</span>
+            <span className="text-[11px] font-bold text-slate-500 uppercase tracking-wide">Sync Queued</span>
           </div>
         </div>
       </div>
@@ -116,6 +116,9 @@ export const DashboardScreen: React.FC = () => {
                 ? dict.allPatients
                 : `${selectedFilter} Priority Patients`}
             </span>
+            <span className="text-[11px] text-slate-400 font-normal">
+              ({filteredPatients.length} shown)
+            </span>
           </div>
 
           {selectedFilter !== 'ALL' && (
@@ -128,7 +131,8 @@ export const DashboardScreen: React.FC = () => {
           )}
         </div>
 
-        <div className="space-y-2.5">
+        {/* Responsive Patient Cards Grid: 1 col on mobile, 2 col on tablet/desktop, 3 col on large desktop */}
+        <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-3.5">
           {filteredPatients.map((p) => (
             <PatientCard
               key={p.patient_id}

@@ -50,7 +50,7 @@ const MainLayout: React.FC = () => {
       )}
 
       {/* Main Content Area */}
-      <main className="flex-1 max-w-2xl w-full mx-auto px-3.5 pt-3 pb-8">
+      <main className="flex-1 max-w-7xl w-full mx-auto px-3 sm:px-6 lg:px-8 pt-3 sm:pt-5 pb-24 md:pb-14">
         {activeTab === 'dashboard' && <DashboardScreen />}
         {activeTab === 'upload' && <UploadScreen />}
         {activeTab === 'review' && <ReviewScreen />}

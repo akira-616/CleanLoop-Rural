@@ -222,46 +222,48 @@ export const ReviewForm: React.FC<ReviewFormProps> = ({
   };
 
   return (
-    <div className="space-y-6">
-      {/* Patient Header Banner */}
-      {patient && (
-        <div className="bg-teal-50 border border-teal-200 rounded-xl p-3 flex items-center justify-between">
-          <div>
-            <span className="text-[10px] font-bold uppercase tracking-wider text-teal-800">
-              Target Patient
-            </span>
-            <div className="font-bold text-slate-900 text-sm">
-              {patient.name}{' '}
-              <span className="font-normal text-slate-500">
-                ({patient.age}/{patient.sex} • {patient.village})
+    <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
+      {/* Left Column: Target Patient & Sticky Source Note Preview (lg:col-span-5) */}
+      <div className="lg:col-span-5 space-y-4 lg:sticky lg:top-16">
+        {patient && (
+          <div className="bg-teal-50 border border-teal-200 rounded-xl p-3 flex items-center justify-between">
+            <div>
+              <span className="text-[10px] font-bold uppercase tracking-wider text-teal-800">
+                Target Patient
               </span>
+              <div className="font-bold text-slate-900 text-sm">
+                {patient.name}{' '}
+                <span className="font-normal text-slate-500 text-xs">
+                  ({patient.age}/{patient.sex} • {patient.village})
+                </span>
+              </div>
+            </div>
+            <span className="text-xs font-mono font-bold text-teal-700 bg-white px-2 py-1 rounded border border-teal-200">
+              {patient.patient_id}
+            </span>
+          </div>
+        )}
+
+        {/* Note Image Preview (if extracted from image) */}
+        {noteImage && (
+          <div className="bg-white rounded-xl border border-slate-200 p-3.5 shadow-xs space-y-2">
+            <div className="flex items-center justify-between">
+              <span className="text-xs font-bold text-slate-700">Source Clinic Note</span>
+              <span className="text-[11px] text-teal-700 font-medium">Original Photo / Canvas</span>
+            </div>
+            <div className="max-h-80 lg:max-h-[540px] overflow-y-auto rounded-lg border border-slate-200 bg-slate-50 flex items-center justify-center p-2">
+              <img
+                src={noteImage}
+                alt="Prescription Note"
+                className="max-h-76 lg:max-h-[520px] w-auto object-contain rounded shadow-xs"
+              />
             </div>
           </div>
-          <span className="text-xs font-mono font-bold text-teal-700 bg-white px-2 py-1 rounded border border-teal-200">
-            {patient.patient_id}
-          </span>
-        </div>
-      )}
+        )}
+      </div>
 
-      {/* Note Image Preview (if extracted from image) */}
-      {noteImage && (
-        <div className="bg-white rounded-xl border border-slate-200 p-3 shadow-xs">
-          <div className="flex items-center justify-between mb-2">
-            <span className="text-xs font-bold text-slate-700">Source Clinic Note</span>
-            <span className="text-[11px] text-teal-700 font-medium">Original Photo / Canvas</span>
-          </div>
-          <div className="max-h-64 overflow-y-auto rounded-lg border border-slate-200 bg-slate-50 flex items-center justify-center p-2">
-            <img
-              src={noteImage}
-              alt="Prescription Note"
-              className="max-h-60 w-auto object-contain rounded shadow-xs"
-            />
-          </div>
-        </div>
-      )}
-
-      {/* Form Fields */}
-      <div className="space-y-4">
+      {/* Right Column: Form Fields & Confirmation (lg:col-span-7) */}
+      <div className="lg:col-span-7 space-y-4">
         {/* Visit Date */}
         <div
           className={`p-3.5 rounded-xl border bg-white shadow-2xs space-y-2 transition-colors ${
@@ -482,12 +484,12 @@ export const ReviewForm: React.FC<ReviewFormProps> = ({
             {medicines.map((med, idx) => (
               <div
                 key={idx}
-                className="grid grid-cols-12 gap-1.5 items-center p-2 rounded-lg bg-slate-50 border border-slate-200 text-xs"
+                className="p-2.5 rounded-lg bg-slate-50 border border-slate-200 text-xs space-y-1.5 sm:space-y-0 sm:grid sm:grid-cols-12 sm:gap-2 sm:items-center"
               >
-                <div className="col-span-4">
+                <div className="flex items-center justify-between gap-2 sm:col-span-4">
                   <input
                     type="text"
-                    placeholder="Medicine name"
+                    placeholder="Medicine name (e.g. Amlodipine)"
                     value={med.name}
                     onChange={(e) => {
                       const updated = [...medicines];
@@ -495,45 +497,56 @@ export const ReviewForm: React.FC<ReviewFormProps> = ({
                       setMedicines(updated);
                       markEdited('medicines');
                     }}
-                    className="w-full px-2 py-1 rounded border border-slate-300 bg-white text-xs"
+                    className="flex-1 sm:w-full px-2.5 py-1.5 rounded border border-slate-300 bg-white text-xs"
                   />
-                </div>
-                <div className="col-span-3">
-                  <input
-                    type="text"
-                    placeholder="Dose"
-                    value={med.dose || ''}
-                    onChange={(e) => {
-                      const updated = [...medicines];
-                      updated[idx].dose = e.target.value;
-                      setMedicines(updated);
-                      markEdited('medicines');
-                    }}
-                    className="w-full px-2 py-1 rounded border border-slate-300 bg-white text-xs"
-                  />
-                </div>
-                <div className="col-span-4">
-                  <select
-                    value={med.change}
-                    onChange={(e) => {
-                      const updated = [...medicines];
-                      updated[idx].change = e.target.value as any;
-                      setMedicines(updated);
-                      markEdited('medicines');
-                    }}
-                    className="w-full px-1.5 py-1 rounded border border-slate-300 bg-white text-[11px]"
+                  <button
+                    type="button"
+                    onClick={() => removeMedicine(idx)}
+                    className="sm:hidden text-slate-400 hover:text-rose-600 p-1 shrink-0"
+                    title="Remove medicine"
                   >
-                    <option value="continued">Continued</option>
-                    <option value="started">Started</option>
-                    <option value="increased">Increased</option>
-                    <option value="stopped">Stopped</option>
-                  </select>
+                    <Trash2 className="w-4 h-4" />
+                  </button>
                 </div>
-                <div className="col-span-1 text-right">
+                <div className="grid grid-cols-2 gap-2 sm:contents">
+                  <div className="sm:col-span-3">
+                    <input
+                      type="text"
+                      placeholder="Dose (e.g. 5mg OD)"
+                      value={med.dose || ''}
+                      onChange={(e) => {
+                        const updated = [...medicines];
+                        updated[idx].dose = e.target.value;
+                        setMedicines(updated);
+                        markEdited('medicines');
+                      }}
+                      className="w-full px-2.5 py-1.5 rounded border border-slate-300 bg-white text-xs"
+                    />
+                  </div>
+                  <div className="sm:col-span-4">
+                    <select
+                      value={med.change}
+                      onChange={(e) => {
+                        const updated = [...medicines];
+                        updated[idx].change = e.target.value as any;
+                        setMedicines(updated);
+                        markEdited('medicines');
+                      }}
+                      className="w-full px-2 py-1.5 rounded border border-slate-300 bg-white text-xs"
+                    >
+                      <option value="continued">Continued</option>
+                      <option value="started">Started</option>
+                      <option value="increased">Increased</option>
+                      <option value="stopped">Stopped</option>
+                    </select>
+                  </div>
+                </div>
+                <div className="hidden sm:block sm:col-span-1 text-right">
                   <button
                     type="button"
                     onClick={() => removeMedicine(idx)}
                     className="text-slate-400 hover:text-rose-600 p-1"
+                    title="Remove medicine"
                   >
                     <Trash2 className="w-3.5 h-3.5" />
                   </button>
@@ -565,10 +578,13 @@ export const ReviewForm: React.FC<ReviewFormProps> = ({
           ) : (
             <div className="space-y-1.5">
               {testsOrdered.map((t, idx) => (
-                <div key={idx} className="flex items-center gap-2">
+                <div
+                  key={idx}
+                  className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2 p-2 sm:p-0 bg-slate-50 sm:bg-transparent rounded-lg border sm:border-0 border-slate-200"
+                >
                   <input
                     type="text"
-                    placeholder="Test name"
+                    placeholder="Test name (e.g. Fasting Blood Sugar, Urine Albumin)"
                     value={t.name}
                     onChange={(e) => {
                       const copy = [...testsOrdered];
@@ -578,25 +594,27 @@ export const ReviewForm: React.FC<ReviewFormProps> = ({
                     }}
                     className="flex-1 px-2.5 py-1.5 rounded border border-slate-300 bg-white text-xs"
                   />
-                  <input
-                    type="text"
-                    placeholder="When (e.g. 2 weeks)"
-                    value={t.when_text || ''}
-                    onChange={(e) => {
-                      const copy = [...testsOrdered];
-                      copy[idx].when_text = e.target.value;
-                      setTestsOrdered(copy);
-                      markEdited('tests_ordered');
-                    }}
-                    className="w-32 px-2.5 py-1.5 rounded border border-slate-300 bg-white text-xs"
-                  />
-                  <button
-                    type="button"
-                    onClick={() => removeTest(idx)}
-                    className="text-slate-400 hover:text-rose-600 p-1"
-                  >
-                    <Trash2 className="w-3.5 h-3.5" />
-                  </button>
+                  <div className="flex items-center gap-2">
+                    <input
+                      type="text"
+                      placeholder="When (e.g. 2 weeks)"
+                      value={t.when_text || ''}
+                      onChange={(e) => {
+                        const copy = [...testsOrdered];
+                        copy[idx].when_text = e.target.value;
+                        setTestsOrdered(copy);
+                        markEdited('tests_ordered');
+                      }}
+                      className="flex-1 sm:w-36 px-2.5 py-1.5 rounded border border-slate-300 bg-white text-xs"
+                    />
+                    <button
+                      type="button"
+                      onClick={() => removeTest(idx)}
+                      className="text-slate-400 hover:text-rose-600 p-1.5"
+                    >
+                      <Trash2 className="w-3.5 h-3.5" />
+                    </button>
+                  </div>
                 </div>
               ))}
             </div>
@@ -608,10 +626,10 @@ export const ReviewForm: React.FC<ReviewFormProps> = ({
           <label className="text-xs font-bold text-slate-800">
             Planned Follow-up / Clinical Plan
           </label>
-          <div className="grid grid-cols-2 gap-2">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
             <input
               type="text"
-              placeholder="What (e.g. Next routine visit)"
+              placeholder="What (e.g. Routine BP check)"
               value={plannedWhat}
               onChange={(e) => {
                 setPlannedWhat(e.target.value);
@@ -638,7 +656,7 @@ export const ReviewForm: React.FC<ReviewFormProps> = ({
             <Share2 className="w-4 h-4 text-indigo-700" />
             Referral (Optional)
           </label>
-          <div className="grid grid-cols-2 gap-2">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
             <input
               type="text"
               placeholder="Referral Facility (e.g. CHC Rampur)"
@@ -648,40 +666,40 @@ export const ReviewForm: React.FC<ReviewFormProps> = ({
             />
             <input
               type="text"
-              placeholder="Reason for referral"
+              placeholder="Reason for referral (e.g. persistent spike)"
               value={referralReason}
               onChange={(e) => setReferralReason(e.target.value)}
               className="px-3 py-2 rounded-lg border border-slate-300 bg-white text-xs"
             />
           </div>
         </div>
+
+        {/* Confirmation Safeguard Banner */}
+        {hasUnresolvedAmber && (
+          <div className="p-3 bg-amber-50 border border-amber-300 rounded-xl text-amber-900 text-xs flex items-center gap-2">
+            <AlertCircle className="w-4 h-4 text-amber-700 shrink-0" />
+            <span>
+              {dict.confirmDisabledHint ||
+                'Please review and verify all low-confidence fields before saving.'}
+            </span>
+          </div>
+        )}
+
+        {/* Confirm Button */}
+        <button
+          type="button"
+          disabled={hasUnresolvedAmber || isSubmitting}
+          onClick={handleConfirmAndSave}
+          className={`w-full py-3 px-4 rounded-xl font-bold text-sm shadow-md flex items-center justify-center gap-2 transition-all ${
+            hasUnresolvedAmber || isSubmitting
+              ? 'bg-slate-300 text-slate-500 cursor-not-allowed shadow-none'
+              : 'bg-teal-700 hover:bg-teal-800 text-white active:scale-[0.99]'
+          }`}
+        >
+          <Check className="w-4 h-4" />
+          {isSubmitting ? 'Saving Visit...' : dict.confirmAndSave}
+        </button>
       </div>
-
-      {/* Confirmation Safeguard Banner */}
-      {hasUnresolvedAmber && (
-        <div className="p-3 bg-amber-50 border border-amber-300 rounded-xl text-amber-900 text-xs flex items-center gap-2">
-          <AlertCircle className="w-4 h-4 text-amber-700 shrink-0" />
-          <span>
-            {dict.confirmDisabledHint ||
-              'Please review and verify all low-confidence fields before saving.'}
-          </span>
-        </div>
-      )}
-
-      {/* Confirm Button */}
-      <button
-        type="button"
-        disabled={hasUnresolvedAmber || isSubmitting}
-        onClick={handleConfirmAndSave}
-        className={`w-full py-3 px-4 rounded-xl font-bold text-sm shadow-md flex items-center justify-center gap-2 transition-all ${
-          hasUnresolvedAmber || isSubmitting
-            ? 'bg-slate-300 text-slate-500 cursor-not-allowed shadow-none'
-            : 'bg-teal-700 hover:bg-teal-800 text-white active:scale-[0.99]'
-        }`}
-      >
-        <Check className="w-4 h-4" />
-        {isSubmitting ? 'Saving Visit...' : dict.confirmAndSave}
-      </button>
     </div>
   );
 };

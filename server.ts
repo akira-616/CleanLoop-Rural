@@ -223,7 +223,7 @@ ${noteText}
     }
 
     let response: any = null;
-    const modelsToTry = ['gemini-2.5-flash', 'gemini-3.8-flash', 'gemini-3.1-flash-lite'];
+    const modelsToTry = ['gemini-flash-latest', 'gemini-3.1-flash-lite', 'gemini-3.8-flash'];
 
     for (const modelName of modelsToTry) {
       try {
@@ -238,15 +238,18 @@ ${noteText}
         });
         if (response) break;
       } catch (err: any) {
-        if (err?.status === 429 || err?.message?.includes('429') || err?.message?.includes('Quota')) {
-          continue; // Try next model
-        }
-        throw err;
+        console.warn(`[Gemini Extract Note] Model ${modelName} unavailable or rate-limited:`, err?.message?.slice(0, 120) || 'API limit');
+        continue; // Try next model in sequence
       }
     }
 
     if (!response) {
-      throw new Error('All Gemini models rate-limited or quota exceeded.');
+      return res.json({
+        success: false,
+        error: 'Gemini free-tier quota reached. Switched to smart clinical fallback extractor.',
+        isFallbackAvailable: true,
+        rateLimited: true,
+      });
     }
 
     const responseText = response.text?.trim() || '{}';
@@ -258,7 +261,7 @@ ${noteText}
       source: 'gemini',
     });
   } catch (error: any) {
-    console.warn('[Gemini Extract Note Notice]:', error?.message || 'Rate limit / quota notice');
+    console.warn('[Gemini Extract Note notice]:', error?.message?.slice(0, 120) || 'Serving fallback');
     res.json({
       success: false,
       error: 'Gemini rate-limited or quota exhausted. Serving clinical fallback parser.',
@@ -296,7 +299,7 @@ Original Template:
 "${templateReason}"`;
 
     let response: any = null;
-    const modelsToTry = ['gemini-2.5-flash', 'gemini-3.8-flash', 'gemini-3.1-flash-lite'];
+    const modelsToTry = ['gemini-flash-latest', 'gemini-3.1-flash-lite', 'gemini-3.8-flash'];
 
     for (const modelName of modelsToTry) {
       try {
@@ -309,10 +312,8 @@ Original Template:
         });
         if (response) break;
       } catch (err: any) {
-        if (err?.status === 429 || err?.message?.includes('429') || err?.message?.includes('Quota')) {
-          continue;
-        }
-        throw err;
+        console.warn(`[Gemini Explain Flag] Model ${modelName} notice:`, err?.message?.slice(0, 120) || 'API limit');
+        continue;
       }
     }
 
@@ -325,7 +326,7 @@ Original Template:
       source: response ? 'ai' : 'rule',
     });
   } catch (error: any) {
-    console.warn('[Gemini Explain Flag Notice]:', error?.message || 'Rate limit / quota notice');
+    console.warn('[Gemini Explain Flag notice]:', error?.message?.slice(0, 120) || 'Serving fallback template');
     res.json({
       success: false,
       explanation: templateReason,

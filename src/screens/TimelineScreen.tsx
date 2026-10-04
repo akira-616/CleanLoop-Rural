@@ -285,24 +285,26 @@ export const TimelineScreen: React.FC = () => {
         )}
       </div>
 
-      {/* Vitals Trend Charts */}
+      {/* Vitals Trend Charts: 1 column on mobile, 2 columns on tablet & desktop */}
       <div className="space-y-3">
-        {/* Blood Pressure Chart */}
-        <div>
-          <h3 className="text-xs font-bold text-slate-800 uppercase tracking-wider mb-1.5 flex items-center gap-1.5 px-1">
-            <Heart className="w-4 h-4 text-rose-600" />
-            {dict.bpTrendChart}
-          </h3>
-          <BpChart visits={patient.visits} />
-        </div>
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+          {/* Blood Pressure Chart */}
+          <div>
+            <h3 className="text-xs font-bold text-slate-800 uppercase tracking-wider mb-1.5 flex items-center gap-1.5 px-1">
+              <Heart className="w-4 h-4 text-rose-600" />
+              {dict.bpTrendChart}
+            </h3>
+            <BpChart visits={patient.visits} />
+          </div>
 
-        {/* Blood Sugar Chart */}
-        <div>
-          <h3 className="text-xs font-bold text-slate-800 uppercase tracking-wider mb-1.5 flex items-center gap-1.5 px-1">
-            <Activity className="w-4 h-4 text-amber-600" />
-            {dict.sugarTrendChart}
-          </h3>
-          <SugarChart visits={patient.visits} />
+          {/* Blood Sugar Chart */}
+          <div>
+            <h3 className="text-xs font-bold text-slate-800 uppercase tracking-wider mb-1.5 flex items-center gap-1.5 px-1">
+              <Activity className="w-4 h-4 text-amber-600" />
+              {dict.sugarTrendChart}
+            </h3>
+            <SugarChart visits={patient.visits} />
+          </div>
         </div>
 
         {/* Weight Sparkline */}
@@ -311,106 +313,114 @@ export const TimelineScreen: React.FC = () => {
         </div>
       </div>
 
-      {/* Open Follow-ups Section */}
-      <div className="bg-white p-4 rounded-2xl border border-slate-200 shadow-2xs space-y-3">
-        <div className="flex items-center justify-between">
-          <h3 className="text-xs font-bold text-slate-900 uppercase tracking-wider flex items-center gap-1.5">
-            <Clock className="w-4 h-4 text-teal-700" />
-            {dict.openFollowups} ({openFollowups.length})
-          </h3>
-          <span className="text-[10px] text-slate-400">
-            Ref date: {demoToday}
-          </span>
+      {/* Follow-ups and Visit Records: 1 column on mobile, 2 columns on desktop (5 cols / 7 cols) */}
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
+        {/* Open Follow-ups Section (Left Column on Desktop) */}
+        <div className="lg:col-span-5 bg-white p-4 rounded-2xl border border-slate-200 shadow-2xs space-y-3 lg:sticky lg:top-16">
+          <div className="flex items-center justify-between">
+            <h3 className="text-xs font-bold text-slate-900 uppercase tracking-wider flex items-center gap-1.5">
+              <Clock className="w-4 h-4 text-teal-700" />
+              {dict.openFollowups} ({openFollowups.length})
+            </h3>
+            <span className="text-[10px] text-slate-400">
+              Ref date: {demoToday}
+            </span>
+          </div>
+
+          {openFollowups.length === 0 ? (
+            <p className="text-xs text-slate-500 italic p-3 bg-slate-50 rounded-xl text-center">
+              {dict.noFollowups}
+            </p>
+          ) : (
+            <div className="space-y-2">
+              {openFollowups.map((item) => {
+                const isOverdue = item.due_date < demoToday;
+                const overdueDays = isOverdue ? dateDiffDays(demoToday, item.due_date) : 0;
+
+                return (
+                  <div
+                    key={item.id}
+                    className={`p-3 rounded-xl border flex items-center justify-between gap-2 transition-all ${
+                      isOverdue
+                        ? overdueDays > 14
+                          ? 'bg-rose-50/80 border-rose-300'
+                          : 'bg-amber-50/80 border-amber-300'
+                        : 'bg-slate-50 border-slate-200'
+                    }`}
+                  >
+                    <div className="min-w-0">
+                      <div className="flex items-center gap-2 flex-wrap">
+                        <span className="text-xs font-bold text-slate-900">
+                          {item.description}
+                        </span>
+                        <span className="text-[10px] font-semibold uppercase tracking-wider px-1.5 py-0.2 rounded bg-white border border-slate-200 text-slate-600">
+                          {item.kind}
+                        </span>
+                      </div>
+
+                      <div className="text-[11px] text-slate-500 mt-0.5">
+                        Due: <span className="font-semibold">{item.due_date}</span>
+                        {isOverdue && (
+                          <span className="font-bold text-rose-700 ml-1.5">
+                            (Overdue by {overdueDays} days)
+                          </span>
+                        )}
+                      </div>
+                    </div>
+
+                    <button
+                      onClick={() => completeFollowup(patient.patient_id, item.id)}
+                      className="shrink-0 inline-flex items-center gap-1 px-2.5 py-1.5 bg-white hover:bg-teal-50 text-teal-800 border border-teal-300 rounded-lg text-xs font-bold shadow-2xs transition-colors"
+                    >
+                      <Check className="w-3.5 h-3.5 text-teal-600" />
+                      {dict.markDone}
+                    </button>
+                  </div>
+                );
+              })}
+            </div>
+          )}
+
+          {/* Recently completed follow-ups list */}
+          {completedFollowups.length > 0 && (
+            <div className="pt-2 border-t border-slate-100">
+              <span className="text-[11px] font-bold text-slate-500 uppercase tracking-wider">
+                Completed Care Items ({completedFollowups.length})
+              </span>
+              <div className="space-y-1 mt-1 max-h-48 overflow-y-auto pr-1">
+                {completedFollowups.slice(-5).map((f) => (
+                  <div
+                    key={f.id}
+                    className="text-xs text-slate-600 flex items-center justify-between p-1.5 bg-slate-50 rounded"
+                  >
+                    <span className="truncate">{f.description}</span>
+                    <span className="text-[10px] text-emerald-700 font-semibold shrink-0">
+                      Done ✓ ({f.completed_on || 'Resolved'})
+                    </span>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
         </div>
 
-        {openFollowups.length === 0 ? (
-          <p className="text-xs text-slate-500 italic p-3 bg-slate-50 rounded-xl text-center">
-            {dict.noFollowups}
-          </p>
-        ) : (
-          <div className="space-y-2">
-            {openFollowups.map((item) => {
-              const isOverdue = item.due_date < demoToday;
-              const overdueDays = isOverdue ? dateDiffDays(demoToday, item.due_date) : 0;
-
-              return (
-                <div
-                  key={item.id}
-                  className={`p-3 rounded-xl border flex items-center justify-between gap-2 transition-all ${
-                    isOverdue
-                      ? overdueDays > 14
-                        ? 'bg-rose-50/80 border-rose-300'
-                        : 'bg-amber-50/80 border-amber-300'
-                      : 'bg-slate-50 border-slate-200'
-                  }`}
-                >
-                  <div className="min-w-0">
-                    <div className="flex items-center gap-2 flex-wrap">
-                      <span className="text-xs font-bold text-slate-900">
-                        {item.description}
-                      </span>
-                      <span className="text-[10px] font-semibold uppercase tracking-wider px-1.5 py-0.2 rounded bg-white border border-slate-200 text-slate-600">
-                        {item.kind}
-                      </span>
-                    </div>
-
-                    <div className="text-[11px] text-slate-500 mt-0.5">
-                      Due: <span className="font-semibold">{item.due_date}</span>
-                      {isOverdue && (
-                        <span className="font-bold text-rose-700 ml-1.5">
-                          (Overdue by {overdueDays} days)
-                        </span>
-                      )}
-                    </div>
-                  </div>
-
-                  <button
-                    onClick={() => completeFollowup(patient.patient_id, item.id)}
-                    className="shrink-0 inline-flex items-center gap-1 px-2.5 py-1.5 bg-white hover:bg-teal-50 text-teal-800 border border-teal-300 rounded-lg text-xs font-bold shadow-2xs transition-colors"
-                  >
-                    <Check className="w-3.5 h-3.5 text-teal-600" />
-                    {dict.markDone}
-                  </button>
-                </div>
-              );
-            })}
-          </div>
-        )}
-
-        {/* Recently completed follow-ups list */}
-        {completedFollowups.length > 0 && (
-          <div className="pt-2 border-t border-slate-100">
-            <span className="text-[11px] font-bold text-slate-500 uppercase tracking-wider">
-              Completed Care Items ({completedFollowups.length})
+        {/* Vertical Timeline of Visits (Right Column on Desktop) */}
+        <div className="lg:col-span-7 bg-white p-4 rounded-2xl border border-slate-200 shadow-2xs space-y-3">
+          <div className="flex items-center justify-between border-b border-slate-100 pb-2">
+            <h3 className="text-xs font-bold text-slate-900 uppercase tracking-wider flex items-center gap-1.5">
+              <Calendar className="w-4 h-4 text-teal-700" />
+              Visit Timeline Records ({patient.visits.length})
+            </h3>
+            <span className="text-[11px] text-slate-500">
+              Chronological OPD Visits
             </span>
-            <div className="space-y-1 mt-1">
-              {completedFollowups.slice(-3).map((f) => (
-                <div
-                  key={f.id}
-                  className="text-xs text-slate-600 flex items-center justify-between p-1.5 bg-slate-50 rounded"
-                >
-                  <span className="truncate">{f.description}</span>
-                  <span className="text-[10px] text-emerald-700 font-semibold shrink-0">
-                    Done ✓ ({f.completed_on || 'Resolved'})
-                  </span>
-                </div>
-              ))}
-            </div>
           </div>
-        )}
-      </div>
 
-      {/* Vertical Timeline of Visits */}
-      <div className="bg-white p-4 rounded-2xl border border-slate-200 shadow-2xs space-y-3">
-        <h3 className="text-xs font-bold text-slate-900 uppercase tracking-wider flex items-center gap-1.5">
-          <Calendar className="w-4 h-4 text-teal-700" />
-          Visit Timeline Records ({patient.visits.length})
-        </h3>
-
-        <div className="pt-2">
-          {sortedVisits.map((v, idx) => (
-            <TimelineCard key={v.id} visit={v} isLatest={idx === 0} />
-          ))}
+          <div className="pt-2">
+            {sortedVisits.map((v, idx) => (
+              <TimelineCard key={v.id} visit={v} isLatest={idx === 0} />
+            ))}
+          </div>
         </div>
       </div>
     </div>
