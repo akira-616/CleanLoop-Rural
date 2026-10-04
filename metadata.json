@@ -1,0 +1,7 @@
+{
+  "name": "CareLoop Rural",
+  "description": "Decision support for traveling doctors in rural clinics. Digitizes paper notes, builds patient timelines, tracks hypertension & diabetes trends, and flags worsening vitals or missed follow-ups.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
+
